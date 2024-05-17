@@ -1,11 +1,11 @@
 import keras
 import PIL.Image
-import json
+import tqdm
 import numpy as np
 
 
 def upscale(image, model):
-    data=model.predict(np.array([image]))[0]
+    data=model.predict(np.array([image]),verbose = 0)[0]
     img=PIL.Image.new("L",(4,4))
     img.putdata(data)
     img=img.transpose(PIL.Image.FLIP_LEFT_RIGHT)
@@ -14,14 +14,27 @@ def upscale(image, model):
 
 
 def imageTo3x3Chunks(image: PIL.Image):
+    _pixels = list(image.getdata())
+    pixels=[]
+    for i in range((image.height//3)*3):
+        pixels.append([_pixels[i*(image.width//3)*3+k]
+                for k in range((image.width//3)*3)])
     chunks = []
-    for i in range(0, image.width, 3):
-        for j in range(0, image.height, 3):
-            chunk = []
-            for x in range(3):
-                for y in range(3):
-                    chunk.append(image.getpixel((i+x, j+y)))
-            chunks.append(chunk)
+    for i in range(len(pixels)//3):
+        for j in range(len(pixels[0])//3):
+            chunks.append(
+                [
+                    pixels[i*3][j*3],
+                    pixels[i*3+1][j*3],
+                    pixels[i*3+2][j*3],
+                    pixels[i*3][j*3+1],
+                    pixels[i*3+1][j*3+1],
+                    pixels[i*3+2][j*3+1],
+                    pixels[i*3][j*3+2],
+                    pixels[i*3+1][j*3+2],
+                    pixels[i*3+2][j*3+2]
+                ]
+            )
     return chunks
 
 
@@ -31,7 +44,7 @@ image = PIL.Image.open("testing.jpg")
 image = image.convert("L")
 image = image.resize(((image.width//3)*3, (image.height//3)*3))
 chunks = imageTo3x3Chunks(image)
-upscaledChunks = [upscale(chunk, model) for chunk in chunks]
+upscaledChunks = [upscale(chunk, model) for chunk in tqdm.tqdm(chunks)]
 out2 = []
 
 # 2d chucks

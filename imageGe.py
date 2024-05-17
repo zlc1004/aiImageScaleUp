@@ -1,4 +1,4 @@
-import keras,json
+import keras,json,tqdm
 import numpy as np
 
 with open("imageTrainData.json") as f:
@@ -16,6 +16,7 @@ model.add(keras.layers.Dense(units=4*4))
 
 model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.MeanAbsoluteError())
 
-model.fit(x=x_train, y=y_train, epochs=1000)
+for i in tqdm.tqdm(range(5000)):
+    model.fit(x=x_train, y=y_train, epochs=1,verbose = 0)
 
 model.save("model.keras")
