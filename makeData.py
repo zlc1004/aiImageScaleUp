@@ -1,7 +1,7 @@
 import PIL.Image
 import json
 
-def imageTo3x3Chunks(image:PIL.Image)->[((int,int,int),(int,int,int),(int,int,int))]:
+def imageTo3x3Chunks(image:PIL.Image):
     chunks=[]
     for i in range(0,image.width,3):
         for j in range(0,image.height,3):
@@ -11,7 +11,7 @@ def imageTo3x3Chunks(image:PIL.Image)->[((int,int,int),(int,int,int),(int,int,in
                     chunk.append(image.getpixel((i+x,j+y)))
             chunks.append(chunk)
     return chunks
-def imageTo4x4Chunks(image:PIL.Image)->[((int,int,int,int),(int,int,int,int),(int,int,int,int),(int,int,int,int))]:
+def imageTo4x4Chunks(image:PIL.Image):
     chunks=[]
     for i in range(0,image.width,4):
         for j in range(0,image.height,4):
@@ -22,16 +22,34 @@ def imageTo4x4Chunks(image:PIL.Image)->[((int,int,int,int),(int,int,int,int),(in
             chunks.append(chunk)
     return chunks
 
+def imageTo5x5Chunks(image:PIL.Image):
+    chunks=[]
+    for i in range(0,image.width,5):
+        for j in range(0,image.height,5):
+            chunk=[]
+            for x in range(5):
+                for y in range(5):
+                    chunk.append(image.getpixel((i+x,j+y)))
+            chunks.append(chunk)
+    return chunks
+
+def take4x4(chunks):
+    chunkOut=[]
+    for i in chunks:
+        chunkOut.append([i[0],i[1],i[2],i[3],
+                         i[5],i[6],i[7],i[8],
+                         i[10],i[11],i[12],i[13],
+                         i[15],i[16],i[17],i[18]])
+    return chunkOut
+
 image=PIL.Image.open("image.jpg")
-image=image.resize((image.width//3)*3,(image.height//3)*3)
-lowerRes=image.resize((image.width//4)*4,(image.height//4)*4)
+image=image.resize(((image.width//5)*5,(image.height//5)*5))
 
-x=imageTo3x3Chunks(lowerRes)
-y=imageTo4x4Chunks(image)
 
-data=[[],[]]
+y=imageTo5x5Chunks(image)
+x=take4x4(y)
 
-data[0]=x
-data[1]=y
+data=[x,y]
+
 with open("imageTrainData.json","w") as f:
     json.dump(data,f)
