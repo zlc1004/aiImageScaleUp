@@ -3,6 +3,10 @@ import PIL.Image
 import tqdm
 import numpy as np
 
+import tensorflow as tf
+from tensorflow.python.keras import backend as K
+config = tf.compat.v1.ConfigProto(device_count={"CPU": 8})
+K.set_session(tf.compat.v1.Session(config=config))
 
 def upscale(image, model):
     data=model.predict(np.array([image]),verbose = 0)[0]
@@ -68,7 +72,7 @@ def imageTo4x4Chunks(image: PIL.Image):
     return chunks
 
 
-model = keras.saving.load_model("model.keras")
+model = keras.saving.load_model("model4to5.keras")
 
 image = PIL.Image.open("testing.jpg")
 image = image.convert("L")
