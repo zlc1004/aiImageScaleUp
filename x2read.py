@@ -8,21 +8,22 @@ from tensorflow.python.keras import backend as K
 config = tf.compat.v1.ConfigProto(device_count={"CPU": 8})
 K.set_session(tf.compat.v1.Session(config=config))
 
+
 def upscale(image, model):
-    data=model.predict(np.array([image]),verbose = 0)[0]
-    img=PIL.Image.new("L",(5,5))
+    data = model.predict(np.array([image]), verbose=0)[0]
+    img = PIL.Image.new("L", (5, 5))
     img.putdata(data)
-    img=img.transpose(PIL.Image.FLIP_LEFT_RIGHT)
-    img=img.rotate(90)
+    img = img.transpose(PIL.Image.FLIP_LEFT_RIGHT)
+    img = img.rotate(90)
     return img.getdata()
 
 
 def imageTo3x3Chunks(image: PIL.Image):
     _pixels = list(image.getdata())
-    pixels=[]
+    pixels = []
     for i in range((image.height//3)*3):
         pixels.append([_pixels[i*(image.width//3)*3+k]
-                for k in range((image.width//3)*3)])
+                       for k in range((image.width//3)*3)])
     chunks = []
     for i in range(len(pixels)//3):
         for j in range(len(pixels[0])//3):
@@ -40,12 +41,14 @@ def imageTo3x3Chunks(image: PIL.Image):
                 ]
             )
     return chunks
+
+
 def imageTo4x4Chunks(image: PIL.Image):
     _pixels = list(image.getdata())
-    pixels=[]
+    pixels = []
     for i in range((image.height//4)*4):
         pixels.append([_pixels[i*(image.width//4)*4+k]
-                for k in range((image.width//4)*4)])
+                       for k in range((image.width//4)*4)])
     chunks = []
     for i in range(len(pixels)//4):
         for j in range(len(pixels[0])//4):
@@ -72,24 +75,24 @@ def imageTo4x4Chunks(image: PIL.Image):
     return chunks
 
 
-model = keras.saving.load_model("model4to5.keras")
+model = keras.saving.load_model("model3to5.keras")
 
 image = PIL.Image.open("testing.jpg")
 image = image.convert("L")
-image = image.resize(((image.width//4)*4, (image.height//4)*4))
-chunks = imageTo4x4Chunks(image)
+image = image.resize(((image.width//3)*3, (image.height//3)*3))
+chunks = imageTo3x3Chunks(image)
 upscaledChunks = [upscale(chunk, model) for chunk in tqdm.tqdm(chunks)]
 out2 = []
 
 # 2d chucks
-for i in range((image.height//4)):
-    out2.append([upscaledChunks[i*(image.width//4)+k]
-                for k in range((image.width//4))])
+for i in range((image.height//3)):
+    out2.append([upscaledChunks[i*(image.width//3)+k]
+                for k in range((image.width//3))])
 
 upscaledChunks = out2[:]
 tmp = []
 for upscaledChunk in upscaledChunks:
-    a, b, c, d,e = [], [], [], [],[]
+    a, b, c, d, e = [], [], [], [], []
     for i in upscaledChunk:
         a += [i[0], i[1], i[2], i[3], i[4]]
         b += [i[5], i[6], i[7], i[8], i[9]]

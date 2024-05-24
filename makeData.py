@@ -1,9 +1,10 @@
-inputSize=3
-outputSize=5
-
-import PIL.Image
+import os
 import json
 import PIL.ImageChops
+import PIL.Image
+import tqdm
+inputSize = 3
+outputSize = 5
 
 
 def imageToChunks(image: PIL.Image, chunkSize: int):
@@ -28,14 +29,19 @@ def resizeChunks(chunks, inputSize, outputSize):
     return chunkOut
 
 
-image = PIL.Image.open("image.jpg")
-image = image.resize(((image.width//5)*5, (image.height//5)*5))
+files = os.listdir("./trainImg")
+x, y = [], []
+print("Training data converting")
+for f in tqdm.tqdm(files):
+    image = PIL.Image.open("./trainImg/"+f)
+    image = image.convert("L")
+    image = image.resize(
+        ((image.width//outputSize)*outputSize, (image.height//outputSize)*outputSize))
+    y += imageToChunks(image, outputSize)
+    x += resizeChunks(y, outputSize, inputSize)
 
-
-y = imageToChunks(image, outputSize)
-x = resizeChunks(y, outputSize, inputSize)
-
-data = [x, y]
 
 with open("imageTrainData.json", "w") as f:
-    json.dump(data, f)
+    print("Dumping training data")
+    json.dump([x, y], f)
+    print("Dumped training data")
