@@ -60,4 +60,4 @@ for _ in tqdm.tqdm(range(epochs)):
         loss.backward()
         optimizer.step()
 
-torch.save(model.state_dict(), "model"+str(input_shape)+"to"+str(output_shape)+".pt")
+torch.save(model.state_dict(), "model"+str(input_shape)+"to"+str(output_shape)+".torch")

@@ -1,14 +1,23 @@
+import os
+os.environ["KERAS_BACKEND"] = "torch"
+
+import keras_core as keras
 import math
 import tqdm
 import json
-import keras
-from tensorflow.python.keras import backend as K
-import tensorflow as tf
+from rich.padding import Padding
+from rich.panel import Panel
+from rich.console import Console
 import numpy as np
+print=Console().print
+
+def printPanel(text, style="on blue"):
+    print(Panel.fit(Padding(
+        text,(2, 5), style=style, expand=False)))
+
+
 epochs = 1000
 
-config = tf.compat.v1.ConfigProto(device_count={"CPU": 8})
-K.set_session(tf.compat.v1.Session(config=config))
 with open("imageTrainData.json") as f:
     data = json.load(f)
 
@@ -26,6 +35,8 @@ model.add(keras.layers.Dense(units=12, input_shape=(input_shape**2,)))
 model.add(keras.layers.Dense(units=18))
 model.add(keras.layers.Dense(units=12))
 model.add(keras.layers.Dense(units=output_shape**2))
+
+printPanel("Backend:"+ keras.backend.backend()+"\n"+"Device:"+ keras.src.backend.torch.core.get_device())
 
 model.compile(optimizer=keras.optimizers.Adam(),
               loss=keras.losses.MeanAbsoluteError())
